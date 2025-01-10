@@ -13,7 +13,7 @@ type PipeProcessor interface {
 }
 
 type PipeProcessorFabric interface {
-	NewPipeProcessor(ctx context.Context, userID int) (PipeProcessor, error)
+	NewPipeProcessor(ctx context.Context, uniqueID string) (PipeProcessor, error)
 }
 
 type Client interface {

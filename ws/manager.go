@@ -3,7 +3,7 @@ package ws
 import (
 	"context"
 	"errors"
-	log "github.com/MikhailGulkin/packages/logger"
+	"github.com/MikhailGulkin/packages/log"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"net/http"
@@ -37,7 +37,7 @@ func NewManager(
 	return manager.With(opts...)
 }
 
-func (m *Manager) Process(uniqueID int, w http.ResponseWriter, r *http.Request, header http.Header) error {
+func (m *Manager) Process(uniqueID string, w http.ResponseWriter, r *http.Request, header http.Header) error {
 	conn, err := m.upgrader.Upgrade(w, r, header)
 	if err != nil {
 		return err

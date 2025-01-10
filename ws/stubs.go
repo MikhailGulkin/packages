@@ -26,6 +26,6 @@ func (p *ProcessorImpl) ProcessWrite() <-chan []byte {
 
 type PipeProcessorFabricImpl struct{}
 
-func (p *PipeProcessorFabricImpl) NewPipeProcessor(ctx context.Context, userID int) (PipeProcessor, error) {
+func (p *PipeProcessorFabricImpl) NewPipeProcessor(ctx context.Context, userID string) (PipeProcessor, error) {
 	return NewProcessorImpl(), nil
 }
