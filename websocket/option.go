@@ -1,4 +1,4 @@
-package ws
+package websocket
 
 type OptionFunc func(*Manager)
 
