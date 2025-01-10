@@ -6,7 +6,7 @@ import (
 	"github.com/MikhailGulkin/packages/log"
 	"github.com/MikhailGulkin/packages/ws"
 	"github.com/gin-gonic/gin"
-	"math/rand"
+	"github.com/google/uuid"
 	"os"
 	"os/signal"
 	"syscall"
@@ -30,7 +30,7 @@ func main() {
 		manager.Run(context.Background())
 	}()
 	app.GET("/ws", func(c *gin.Context) {
-		err := manager.Process(rand.Int(), c.Writer, c.Request, nil)
+		err := manager.Process(uuid.New().String(), c.Writer, c.Request, nil)
 		if err != nil {
 			fmt.Println("error", err)
 		}

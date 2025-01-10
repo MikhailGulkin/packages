@@ -90,6 +90,9 @@ func (m *Manager) Run(ctx context.Context) {
 }
 
 func (m *Manager) Close() error {
+	defer m.mu.Unlock()
+	m.mu.Lock()
+
 	var err error
 	m.isClosed.Store(true)
 	for id, client := range m.clients {

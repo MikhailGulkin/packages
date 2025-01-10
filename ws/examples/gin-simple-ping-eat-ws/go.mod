@@ -3,8 +3,9 @@ module gin-simple-ping-eat-ws
 go 1.23.4
 
 require (
-	github.com/MikhailGulkin/packages v1.0.2
+	github.com/MikhailGulkin/packages v0.0.0-20250110135724-27cfb1870c0f
 	github.com/gin-gonic/gin v1.10.0
+	github.com/google/uuid v1.6.0
 )
 
 require (
@@ -19,7 +20,6 @@ require (
 	github.com/go-playground/validator/v10 v10.23.0 // indirect
 	github.com/goccy/go-json v0.10.4 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
