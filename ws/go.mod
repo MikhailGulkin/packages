@@ -1,4 +1,4 @@
-module github.com/MikhailGulkin/packages/ws
+module github.com/MikhailGulkin/packages/websocket
 
 go 1.23.4
 
