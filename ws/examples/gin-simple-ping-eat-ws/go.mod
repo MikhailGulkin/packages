@@ -3,13 +3,12 @@ module gin-simple-ping-eat-ws
 go 1.23.4
 
 require (
-	github.com/MikhailGulkin/packages v0.0.0-20250110135724-27cfb1870c0f
+	github.com/MikhailGulkin/packages v0.0.0-20250110140232-b6f74429ab8a
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
 )
 
 require (
-	github.com/MikhailGulkin/packages/logger v0.0.0-20250110131502-3edbb9dbc1c0 // indirect
 	github.com/bytedance/sonic v1.12.7 // indirect
 	github.com/bytedance/sonic/loader v0.2.2 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
@@ -44,3 +43,5 @@ require (
 	google.golang.org/protobuf v1.36.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/MikhailGulkin/packages => ../../../

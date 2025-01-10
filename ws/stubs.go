@@ -15,12 +15,12 @@ func NewProcessorImpl() *ProcessorImpl {
 	}
 }
 
-func (p *ProcessorImpl) ProcessRead(ctx context.Context, messageType int, msg []byte) error {
+func (p *ProcessorImpl) ProcessRead(ctx context.Context, messageType int, msg []byte) ([]byte, error) {
 	fmt.Println("ProcessRead", messageType, msg)
-	return nil
+	return msg, nil
 }
 
-func (p *ProcessorImpl) ProcessWrite() <-chan []byte {
+func (p *ProcessorImpl) ListenWrite() <-chan []byte {
 	return p.send
 }
 

@@ -56,7 +56,7 @@ func (m *Manager) Process(uniqueID string, w http.ResponseWriter, r *http.Reques
 	go func() {
 		err := client.Run(context.WithoutCancel(r.Context()))
 		if err != nil {
-			m.logger.Errorw("DefaultClient run error", "error", err)
+			m.logger.Errorw("Client run error", "clientID", client.GetClientID(), "error", err)
 		}
 	}()
 	return nil

@@ -8,8 +8,8 @@ type Logger interface {
 }
 
 type PipeProcessor interface {
-	ProcessRead(ctx context.Context, messageType int, msg []byte) error
-	ProcessWrite() <-chan []byte
+	ProcessRead(ctx context.Context, messageType int, msg []byte) ([]byte, error)
+	ListenWrite() <-chan []byte
 }
 
 type PipeProcessorFabric interface {
