@@ -47,16 +47,23 @@ func (m *Manager) Process(uniqueID string, w http.ResponseWriter, r *http.Reques
 		return err
 	}
 
-	processor, err := m.processorFabric.NewPipeProcessor(r.Context(), uniqueID)
-	if err != nil {
-		return err
-	}
-
-	client := NewDefaultClient(conn, uuid.New().String(), m.deadSignal, processor, m.logger)
-	m.addClient(client.GetClientID(), client)
-
 	go func() {
-		err := client.Run(context.WithoutCancel(r.Context()))
+		processor, err := m.processorFabric.NewPipeProcessor(r.Context(), uniqueID)
+		if err != nil {
+			m.logger.Errorw("error creating pipe processor", "error", err)
+			return
+		}
+		defer func() {
+			err := processor.Close()
+			if err != nil {
+				m.logger.Errorw("error closing pipe processor", "error", err)
+			}
+		}()
+
+		client := NewDefaultClient(conn, uuid.New().String(), m.deadSignal, processor, m.logger)
+		m.addClient(client.GetClientID(), client)
+
+		err = client.Run(context.WithoutCancel(r.Context()))
 		if err != nil {
 			m.logger.Errorw("Client run error", "clientID", client.GetClientID(), "error", err)
 		}

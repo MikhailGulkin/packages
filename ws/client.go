@@ -119,7 +119,7 @@ func (c *DefaultClient) ReadPipe(ctx context.Context) error {
 			}
 
 			if len(answer) == 0 {
-				return nil
+				continue
 			}
 
 			err = c.conn.WriteMessage(websocket.TextMessage, answer)

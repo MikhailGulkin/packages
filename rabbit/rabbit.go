@@ -1,6 +1,7 @@
 package rabbit
 
 import (
+	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -11,8 +12,9 @@ type Conn struct {
 	cfg Config
 }
 type Config struct {
-	URL      string
-	Exchange string
+	URL          string
+	Exchange     string
+	QueuePattern string
 }
 
 func NewRabbitCh(config Config) (*Conn, error) {
@@ -33,12 +35,12 @@ func NewRabbitCh(config Config) (*Conn, error) {
 	}, nil
 }
 
-func (c *Conn) DeclareAndBindQueue(qName, eName, key string) error {
+func (c *Conn) DeclareAndBindQueue(uniqueKey, eName string) error {
 	if eName == "" {
 		eName = c.cfg.Exchange
 	}
 	_, err := c.QueueDeclare(
-		qName,
+		fmt.Sprintf("%s.%s", c.cfg.QueuePattern, uniqueKey),
 		false,
 		true,
 		false,
@@ -50,8 +52,8 @@ func (c *Conn) DeclareAndBindQueue(qName, eName, key string) error {
 	}
 
 	err = c.QueueBind(
-		qName,
-		key,
+		fmt.Sprintf("%s.%s", c.cfg.QueuePattern, uniqueKey),
+		fmt.Sprintf("%s.%s", c.cfg.QueuePattern, uniqueKey),
 		eName,
 		false,
 		nil,

@@ -25,7 +25,7 @@ func main() {
 		return
 	}
 	consume, err := conn.Consume(
-		"user.messages.1",
+		"",
 		"",
 		false,
 		false,

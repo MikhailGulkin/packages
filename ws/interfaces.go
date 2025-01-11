@@ -10,6 +10,7 @@ type Logger interface {
 type PipeProcessor interface {
 	ReadPipeProcessor
 	WritePipeProcessor
+	Close() error
 }
 
 type ReadPipeProcessor interface {

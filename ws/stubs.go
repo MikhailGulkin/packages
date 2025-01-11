@@ -11,6 +11,10 @@ type ProcessorImpl struct {
 	w WritePipeProcessor
 }
 
+func (p *ProcessorImpl) Close() error {
+	return nil
+}
+
 func NewProcessorImpl(
 	ReadProcessor ReadPipeProcessor,
 	WriteProcessor WritePipeProcessor,
@@ -62,6 +66,11 @@ func (p *ProcessorImpl) ListenWrite(ctx context.Context) <-chan []byte {
 }
 
 type PipeProcessorFabricImpl struct{}
+
+func (p *PipeProcessorFabricImpl) Close() error {
+	//TODO implement me
+	panic("implement me")
+}
 
 func (p *PipeProcessorFabricImpl) NewPipeProcessor(ctx context.Context, userID string) (PipeProcessor, error) {
 	return NewProcessorImpl(
