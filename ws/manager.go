@@ -54,6 +54,7 @@ func (m *Manager) Process(uniqueID string, w http.ResponseWriter, r *http.Reques
 		if err != nil {
 			m.logger.Errorw("error creating pipe processor", "error", err)
 			c <- err
+			return
 		}
 		defer func() {
 			err := processor.Close()
