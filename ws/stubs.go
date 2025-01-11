@@ -3,29 +3,69 @@ package ws
 import (
 	"context"
 	"fmt"
+	"time"
 )
 
 type ProcessorImpl struct {
-	send chan []byte
+	r ReadPipeProcessor
+	w WritePipeProcessor
 }
 
-func NewProcessorImpl() *ProcessorImpl {
+func NewProcessorImpl(
+	ReadProcessor ReadPipeProcessor,
+	WriteProcessor WritePipeProcessor,
+) *ProcessorImpl {
 	return &ProcessorImpl{
-		send: make(chan []byte, 256),
+		r: ReadProcessor,
+		w: WriteProcessor,
 	}
 }
 
-func (p *ProcessorImpl) ProcessRead(ctx context.Context, messageType int, msg []byte) ([]byte, error) {
+type ReadPipeProcessorImpl struct{}
+
+func (r *ReadPipeProcessorImpl) ProcessRead(ctx context.Context, messageType int, msg []byte) ([]byte, error) {
 	fmt.Println("ProcessRead", messageType, msg)
 	return msg, nil
 }
 
-func (p *ProcessorImpl) ListenWrite() <-chan []byte {
-	return p.send
+type WritePipeProcessorImpl struct {
+	send chan []byte
+}
+
+func NewWritePipeProcessorImpl() *WritePipeProcessorImpl {
+	send := make(chan []byte, 256)
+	ticker := time.NewTicker(5 * time.Second)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				send <- []byte("some msg default listen write")
+			}
+		}
+	}()
+
+	return &WritePipeProcessorImpl{
+		send: send,
+	}
+}
+
+func (w *WritePipeProcessorImpl) ListenWrite(ctx context.Context) <-chan []byte {
+	return w.send
+}
+
+func (p *ProcessorImpl) ProcessRead(ctx context.Context, messageType int, msg []byte) ([]byte, error) {
+	return p.r.ProcessRead(ctx, messageType, msg)
+}
+
+func (p *ProcessorImpl) ListenWrite(ctx context.Context) <-chan []byte {
+	return p.w.ListenWrite(ctx)
 }
 
 type PipeProcessorFabricImpl struct{}
 
 func (p *PipeProcessorFabricImpl) NewPipeProcessor(ctx context.Context, userID string) (PipeProcessor, error) {
-	return NewProcessorImpl(), nil
+	return NewProcessorImpl(
+		&ReadPipeProcessorImpl{},
+		NewWritePipeProcessorImpl(),
+	), nil
 }

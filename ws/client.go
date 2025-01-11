@@ -37,7 +37,7 @@ func NewDefaultClient(
 		pipeProcessor: pipeProcessor,
 		deadSignal:    deadSignal,
 		logger:        logger,
-		closeChan:     make(chan error),
+		closeChan:     make(chan error, 1),
 		close:         atomic.Bool{},
 		mu:            sync.Mutex{},
 	}
@@ -62,10 +62,6 @@ func (c *DefaultClient) Configure() error {
 		}
 		return nil
 	})
-	err = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-	if err != nil {
-		return err
-	}
 
 	return nil
 
@@ -86,7 +82,12 @@ func (c *DefaultClient) Run(ctx context.Context) error {
 
 	errGroup, ctx := errgroup.WithContext(ctx)
 	errGroup.Go(func() error {
-		return <-c.closeChan
+		select {
+		case <-ctx.Done():
+			return nil
+		case err := <-c.closeChan:
+			return err
+		}
 	})
 	errGroup.Go(func() error {
 		return c.ReadPipe(ctx)
@@ -110,7 +111,7 @@ func (c *DefaultClient) ReadPipe(ctx context.Context) error {
 			messageType, msg, err := c.conn.ReadMessage()
 			if err != nil {
 				if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
-					return errors.Join(err, ErrCloseProperly)
+					return ErrCloseProperly
 				}
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 					return errors.Join(err, ErrConnectionCloseIncorrect)
@@ -130,8 +131,6 @@ func (c *DefaultClient) ReadPipe(ctx context.Context) error {
 			if err != nil {
 				return errors.Join(err, ErrWriteAnswer)
 			}
-			return nil
-
 		}
 	}
 }
@@ -140,14 +139,18 @@ func (c *DefaultClient) WritePipe(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			c.logger.Infow("WritePipe ctx done", "id", c.GetClientID())
+			c.logger.Infow("WritePipe ctx done", "ctxErr", ctx.Err(), "id", c.GetClientID())
 			return nil
-		case msg, ok := <-c.pipeProcessor.ListenWrite():
+		case msg, ok := <-c.pipeProcessor.ListenWrite(ctx):
 			if !ok {
 				return nil
 			}
+			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err != nil {
+				return err
+			}
 
-			err := c.conn.WriteMessage(websocket.TextMessage, msg)
+			err = c.conn.WriteMessage(websocket.TextMessage, msg)
 			if err != nil {
 				return errors.Join(err, ErrWriteAnswer)
 			}
@@ -161,7 +164,7 @@ func (c *DefaultClient) Ping(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			c.logger.Infow("Ping ctx done", "clientID", c.GetClientID())
+			c.logger.Infow("Ping ctx done", "ctxErr", ctx.Err(), "clientID", c.GetClientID())
 			return nil
 		case <-ticker.C:
 			err := c.conn.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(writeWait))

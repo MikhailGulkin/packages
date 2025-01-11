@@ -38,6 +38,10 @@ func NewManager(
 }
 
 func (m *Manager) Process(uniqueID string, w http.ResponseWriter, r *http.Request, header http.Header) error {
+	if m.isClosed.Load() {
+		return ErrManagerClosed
+	}
+
 	conn, err := m.upgrader.Upgrade(w, r, header)
 	if err != nil {
 		return err
@@ -47,9 +51,7 @@ func (m *Manager) Process(uniqueID string, w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		return err
 	}
-	if m.isClosed.Load() {
-		return ErrManagerClosed
-	}
+
 	client := NewDefaultClient(conn, uuid.New().String(), m.deadSignal, processor, m.logger)
 	m.addClient(client.GetClientID(), client)
 
