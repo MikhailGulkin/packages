@@ -75,7 +75,7 @@ func (m *Manager) Process(uniqueID string, w http.ResponseWriter, r *http.Reques
 	case <-r.Context().Done():
 		return nil
 	case err := <-c:
-		return err
+		return errors.Join(err, conn.Close())
 	case <-time.After(connCreateTimeout):
 		return ErrCreateConnTimeout
 	}
