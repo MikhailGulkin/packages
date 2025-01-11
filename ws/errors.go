@@ -9,4 +9,5 @@ var (
 	ErrConnectionCloseIncorrect = errors.New("connection closed incorrect")
 	ErrUnknownReadException     = errors.New("unknown read exception")
 	ErrWriteAnswer              = errors.New("error write answer")
+	ErrCreateConnTimeout        = errors.New("error create connection timeout")
 )

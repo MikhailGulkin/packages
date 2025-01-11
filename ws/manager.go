@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 type Manager struct {
@@ -47,11 +48,12 @@ func (m *Manager) Process(uniqueID string, w http.ResponseWriter, r *http.Reques
 		return err
 	}
 
+	c := make(chan error)
 	go func() {
 		processor, err := m.processorFabric.NewPipeProcessor(r.Context(), uniqueID)
 		if err != nil {
 			m.logger.Errorw("error creating pipe processor", "error", err)
-			return
+			c <- err
 		}
 		defer func() {
 			err := processor.Close()
@@ -68,7 +70,14 @@ func (m *Manager) Process(uniqueID string, w http.ResponseWriter, r *http.Reques
 			m.logger.Errorw("Client run error", "clientID", client.GetClientID(), "error", err)
 		}
 	}()
-	return nil
+	select {
+	case <-r.Context().Done():
+		return nil
+	case err := <-c:
+		return err
+	case <-time.After(connCreateTimeout):
+		return ErrCreateConnTimeout
+	}
 }
 func (m *Manager) addClient(id string, client Client) {
 	defer m.mu.Unlock()

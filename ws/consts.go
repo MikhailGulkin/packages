@@ -3,6 +3,7 @@ package ws
 import "time"
 
 const (
+	connCreateTimeout = 5 * time.Second
 	// Time allowed to write a message to the peer.
 	writeWait = 15 * time.Second
 
