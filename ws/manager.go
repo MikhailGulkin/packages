@@ -65,7 +65,7 @@ func (m *Manager) Process(uniqueID string, w http.ResponseWriter, r *http.Reques
 
 		client := NewDefaultClient(conn, uuid.New().String(), m.deadSignal, processor, m.logger)
 		m.addClient(client.GetClientID(), client)
-
+		c <- nil
 		err = client.Run(context.WithoutCancel(r.Context()))
 		if err != nil {
 			m.logger.Errorw("Client run error", "clientID", client.GetClientID(), "error", err)
@@ -75,7 +75,10 @@ func (m *Manager) Process(uniqueID string, w http.ResponseWriter, r *http.Reques
 	case <-r.Context().Done():
 		return nil
 	case err := <-c:
-		return errors.Join(err, conn.Close())
+		if err != nil {
+			return errors.Join(err, conn.Close())
+		}
+		return nil
 	case <-time.After(connCreateTimeout):
 		return ErrCreateConnTimeout
 	}

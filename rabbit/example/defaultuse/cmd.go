@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
+	"github.com/google/uuid"
+
 	//"fmt"
 	"github.com/MikhailGulkin/packages/rabbit"
 )
 
 func main() {
 	conn, err := rabbit.NewRabbitCh(rabbit.Config{
-		URL:      "amqp://guest:guest@localhost:5672/",
-		Exchange: "user.messages",
+		URL:          "amqp://guest:guest@localhost:5672/",
+		Exchange:     "user.messages",
+		QueuePattern: "user.id",
 	})
 	if err != nil {
 		return
@@ -20,7 +23,7 @@ func main() {
 			fmt.Println(err)
 		}
 	}()
-	err = conn.DeclareAndBindQueue("user.messages.1", "user.messages", "user_id_1")
+	err = conn.DeclareAndBindQueue(uuid.New().String(), "")
 	if err != nil {
 		return
 	}
