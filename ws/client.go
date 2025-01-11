@@ -49,12 +49,7 @@ func (c *DefaultClient) Configure() error {
 		return c.Close()
 
 	})
-	err := c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	if err != nil {
-		return err
-	}
 	c.conn.SetPongHandler(func(appData string) error {
-		c.logger.Infow("pong received", "appData", appData)
 		err := c.conn.SetReadDeadline(time.Now().Add(pongWait))
 		if err != nil {
 			c.logger.Errorw("error setting read deadline", "error", err)
@@ -145,12 +140,8 @@ func (c *DefaultClient) WritePipe(ctx context.Context) error {
 			if !ok {
 				return nil
 			}
-			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			if err != nil {
-				return err
-			}
 
-			err = c.conn.WriteMessage(websocket.TextMessage, msg)
+			err := c.conn.WriteMessage(websocket.TextMessage, msg)
 			if err != nil {
 				return errors.Join(err, ErrWriteAnswer)
 			}
@@ -167,7 +158,11 @@ func (c *DefaultClient) Ping(ctx context.Context) error {
 			c.logger.Infow("Ping ctx done", "ctxErr", ctx.Err(), "clientID", c.GetClientID())
 			return nil
 		case <-ticker.C:
-			err := c.conn.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(writeWait))
+			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err != nil {
+				return err
+			}
+			err = c.conn.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(writeWait))
 			if err != nil {
 				return errors.Join(err, ErrWriteAnswer)
 			}

@@ -12,9 +12,12 @@ func NewConsumer(config Config) (r *kafka.Reader, err error) {
 			err = r.(error)
 		}
 	}()
-	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: config.Brokers,
-	})
+	//reader := kafka.NewReader(kafka.ReaderConfig{
+	//	Brokers: config.Brokers,
+	//	GroupID: "group-id",
+	//	Topic:   "topic",
+	//})
 
-	return reader, err
+	//return reader, err
+	return nil, nil
 }
