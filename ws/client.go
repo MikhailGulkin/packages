@@ -115,7 +115,9 @@ func (c *DefaultClient) ReadPipe(ctx context.Context) error {
 			}
 			answer, err := c.pipeProcessor.ProcessRead(ctx, messageType, msg)
 			if err != nil {
-				return errors.Join(err, ErrProcessRead)
+				// TODO: Add Circuit Breaker and close connection when always error
+				c.logger.Errorw("error processing read", "error", err)
+				continue
 			}
 
 			if len(answer) == 0 {
